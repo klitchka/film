@@ -1,27 +1,36 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
 
 function App() {
-  const { register, handleSubmit, reset } = useForm();
+  const [option, setOption] = useState("");
   const [options, setOptions] = useState([]);
   const [votes, setVotes] = useState({});
 
-  const onSubmit = (data) => {
-    if (data.option && !options.includes(data.option)) {
-      setOptions((oldOptions) => [...oldOptions, data.option]);
-      setVotes((oldVotes) => ({ ...oldVotes, [data.option]: 0 }));
+  const onSubmit = (event) => {
+    event.preventDefault();
+    if (option && !options.includes(option)) {
+      setOptions((oldOptions) => [...oldOptions, option]);
+      setVotes((oldVotes) => ({ ...oldVotes, [option]: 0 }));
     }
-    reset();
+    setOption("");
   };
 
   const handleVote = (option) => {
     setVotes((oldVotes) => ({ ...oldVotes, [option]: oldVotes[option] + 1 }));
   };
 
+  const handleDelete = (optionToRemove) => {
+    setOptions((oldOptions) => oldOptions.filter(option => option !== optionToRemove));
+    setVotes((oldVotes) => {
+      const newVotes = { ...oldVotes };
+      delete newVotes[optionToRemove];
+      return newVotes;
+    });
+  };
+
   return (
     <div className="App">
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <input {...register("option")} required />
+      <form onSubmit={onSubmit}>
+        <input value={option} onChange={(e) => setOption(e.target.value)} required />
         <button type="submit">Añadir opción</button>
       </form>
       <h2>película / film / 映画 / 영화 / фильм / filma</h2>
@@ -29,6 +38,7 @@ function App() {
         <div key={option}>
           {option} - {votes[option]} votos
           <button onClick={() => handleVote(option)}>Votar</button>
+          <button onClick={() => handleDelete(option)}>Eliminar</button>
         </div>
       ))}
     </div>
